@@ -9,6 +9,7 @@ import {
   DEFAULT_COMPARISON,
   DEFAULT_INPUTS,
   INPUT_RANGES,
+  MANUAL_INPUT_LIMITS,
 } from "./config/defaults.js";
 import { buildProjectionCsv, downloadCsv } from "./utils/csv.js";
 import {
@@ -18,14 +19,23 @@ import {
 } from "./utils/formatters.js";
 import { calculateProjection, clampNumber } from "./utils/projections.js";
 
-function sanitizeValue(key, value) {
-  const range = INPUT_RANGES[key];
-  const normalized =
-    key === "years"
-      ? Math.round(Number(value))
-      : Number.parseFloat(value);
+function normalizeValue(key, value) {
+  return key === "years"
+    ? Math.round(Number(value))
+    : Number.parseFloat(value);
+}
 
-  return clampNumber(normalized, range.min, range.max);
+function sanitizeSliderValue(key, value) {
+  const range = INPUT_RANGES[key];
+  return clampNumber(normalizeValue(key, value), range.min, range.max);
+}
+
+function sanitizeManualValue(key, value) {
+  return clampNumber(
+    normalizeValue(key, value),
+    INPUT_RANGES[key].min,
+    MANUAL_INPUT_LIMITS[key],
+  );
 }
 
 function App() {
@@ -64,14 +74,28 @@ function App() {
   function updateInput(key, value) {
     setInputs((current) => ({
       ...current,
-      [key]: sanitizeValue(key, value),
+      [key]: sanitizeManualValue(key, value),
+    }));
+  }
+
+  function updateInputFromSlider(key, value) {
+    setInputs((current) => ({
+      ...current,
+      [key]: sanitizeSliderValue(key, value),
     }));
   }
 
   function updateComparison(key, value) {
     setComparison((current) => ({
       ...current,
-      [key]: sanitizeValue(key, value),
+      [key]: sanitizeManualValue(key, value),
+    }));
+  }
+
+  function updateComparisonFromSlider(key, value) {
+    setComparison((current) => ({
+      ...current,
+      [key]: sanitizeSliderValue(key, value),
     }));
   }
 
@@ -158,31 +182,47 @@ function App() {
                 helperText="Current investment account balance."
                 value={inputs.startingBalance}
                 prefix="$"
+                displayValue={formatPreciseCurrency(inputs.startingBalance)}
                 {...INPUT_RANGES.startingBalance}
                 onChange={(value) => updateInput("startingBalance", value)}
+                onSliderChange={(value) =>
+                  updateInputFromSlider("startingBalance", value)
+                }
               />
               <InputControl
                 label="Annual contribution"
                 helperText="Total planned contribution across the year."
                 value={inputs.annualContribution}
                 prefix="$"
+                displayValue={formatPreciseCurrency(inputs.annualContribution)}
                 {...INPUT_RANGES.annualContribution}
                 onChange={(value) => updateInput("annualContribution", value)}
+                onSliderChange={(value) =>
+                  updateInputFromSlider("annualContribution", value)
+                }
               />
               <InputControl
                 label="Expected annual return"
                 helperText="Estimated nominal annual return rate."
                 value={inputs.annualReturnRate}
                 suffix="%"
+                displayValue={formatRate(inputs.annualReturnRate)}
                 {...INPUT_RANGES.annualReturnRate}
                 onChange={(value) => updateInput("annualReturnRate", value)}
+                onSliderChange={(value) =>
+                  updateInputFromSlider("annualReturnRate", value)
+                }
               />
               <InputControl
                 label="Years projected"
-                helperText="Projection horizon from 1 to 35 years."
+                helperText="Projection horizon from 0 to 100 years."
                 value={inputs.years}
+                displayValue={`${inputs.years} years`}
                 {...INPUT_RANGES.years}
                 onChange={(value) => updateInput("years", value)}
+                onSliderChange={(value) =>
+                  updateInputFromSlider("years", value)
+                }
               />
             </div>
           </div>
@@ -212,9 +252,15 @@ function App() {
                   helperText="Alternate annual contribution."
                   value={comparison.annualContribution}
                   prefix="$"
+                  displayValue={formatPreciseCurrency(
+                    comparison.annualContribution,
+                  )}
                   {...INPUT_RANGES.annualContribution}
                   onChange={(value) =>
                     updateComparison("annualContribution", value)
+                  }
+                  onSliderChange={(value) =>
+                    updateComparisonFromSlider("annualContribution", value)
                   }
                 />
                 <InputControl
@@ -222,9 +268,13 @@ function App() {
                   helperText="Alternate expected annual return."
                   value={comparison.annualReturnRate}
                   suffix="%"
+                  displayValue={formatRate(comparison.annualReturnRate)}
                   {...INPUT_RANGES.annualReturnRate}
                   onChange={(value) =>
                     updateComparison("annualReturnRate", value)
+                  }
+                  onSliderChange={(value) =>
+                    updateComparisonFromSlider("annualReturnRate", value)
                   }
                 />
                 <div className="text-sm text-slate-700 dark:text-slate-300">

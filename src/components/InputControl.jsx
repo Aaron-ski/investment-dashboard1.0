@@ -8,8 +8,12 @@ export default function InputControl({
   type = "number",
   suffix,
   prefix,
+  displayValue,
   onChange,
+  onSliderChange = onChange,
 }) {
+  const sliderValue = Math.min(Math.max(Number(value) || 0, min), max);
+
   return (
     <label className="grid gap-2">
       <span className="flex items-center justify-between gap-3">
@@ -22,19 +26,17 @@ export default function InputControl({
           </span>
         </span>
         <span className="shrink-0 rounded bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700 dark:bg-slate-800 dark:text-slate-200">
-          {prefix}
-          {value}
-          {suffix}
+          {displayValue ?? `${prefix ?? ""}${value}${suffix ?? ""}`}
         </span>
       </span>
       <input
-        className="h-2 w-full cursor-pointer rounded-full bg-slate-200 dark:bg-slate-700"
+        className="dashboard-slider my-4 h-3 w-full cursor-pointer rounded-full bg-slate-200 dark:bg-slate-700"
         type="range"
         min={min}
         max={max}
         step={step}
-        value={value}
-        onChange={(event) => onChange(event.target.value)}
+        value={sliderValue}
+        onChange={(event) => onSliderChange(event.target.value)}
       />
       <div className="relative">
         {prefix ? (
@@ -48,7 +50,6 @@ export default function InputControl({
           } ${suffix ? "pr-10" : ""}`}
           type={type}
           min={min}
-          max={max}
           step={step}
           value={value}
           onChange={(event) => onChange(event.target.value)}

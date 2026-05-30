@@ -39,8 +39,43 @@ input[type="range"] {
   accent-color: #0f766e;
 }
 
+.dashboard-slider {
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.dashboard-slider::-webkit-slider-thumb {
+  width: 48px;
+  height: 48px;
+  appearance: none;
+  -webkit-appearance: none;
+  border: 3px solid #f8fafc;
+  border-radius: 999px;
+  background: #0f766e;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.35);
+}
+
+.dashboard-slider::-moz-range-thumb {
+  width: 48px;
+  height: 48px;
+  border: 3px solid #f8fafc;
+  border-radius: 999px;
+  background: #0f766e;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.35);
+}
+
 html.dark input[type="range"] {
   accent-color: #2dd4bf;
+}
+
+html.dark .dashboard-slider::-webkit-slider-thumb {
+  border-color: #0f172a;
+  background: #2dd4bf;
+}
+
+html.dark .dashboard-slider::-moz-range-thumb {
+  border-color: #0f172a;
+  background: #2dd4bf;
 }
 
 .dashboard-scrollbar {

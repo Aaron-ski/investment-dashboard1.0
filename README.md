@@ -17,10 +17,10 @@ A single-page React dashboard that replaces a recurring investment projection sp
 
 | Input | Default |
 | --- | ---: |
-| Starting balance | $200,000 |
+| Starting balance | $0 |
 | Annual contribution | $23,000 |
 | Expected annual return | 10.00% |
-| Years projected | 35 |
+| Years projected | 25 |
 
 ## Formula Assumptions
 
