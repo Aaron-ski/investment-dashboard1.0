@@ -10,15 +10,33 @@ import {
 } from "recharts";
 import { formatCurrency } from "../utils/formatters.js";
 
-export default function ProjectionChart({ data, showComparison }) {
+export default function ProjectionChart({ data, showComparison, isDarkMode }) {
+  const chartColors = isDarkMode
+    ? {
+        grid: "#334155",
+        text: "#cbd5e1",
+        axis: "#475569",
+        tooltipBackground: "#111827",
+        tooltipBorder: "#475569",
+        tooltipText: "#f8fafc",
+      }
+    : {
+        grid: "#e2e8f0",
+        text: "#475569",
+        axis: "#cbd5e1",
+        tooltipBackground: "#ffffff",
+        tooltipBorder: "#cbd5e1",
+        tooltipText: "#172033",
+      };
+
   return (
-    <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-panel">
+    <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-panel dark:border-slate-700 dark:bg-slate-900">
       <div className="mb-4 flex flex-col justify-between gap-2 sm:flex-row sm:items-end">
         <div>
-          <h2 className="text-lg font-bold text-slate-950">
+          <h2 className="text-lg font-bold text-slate-950 dark:text-white">
             Projected Balance Over Time
           </h2>
-          <p className="text-sm text-slate-500">
+          <p className="text-sm text-slate-500 dark:text-slate-400">
             Year-end balances from monthly deposits and monthly compounding.
           </p>
         </div>
@@ -30,24 +48,24 @@ export default function ProjectionChart({ data, showComparison }) {
             data={data}
             margin={{ top: 12, right: 20, bottom: 8, left: 12 }}
           >
-            <CartesianGrid stroke="#e2e8f0" strokeDasharray="4 4" />
+            <CartesianGrid stroke={chartColors.grid} strokeDasharray="4 4" />
             <XAxis
               dataKey="year"
-              tick={{ fill: "#475569", fontSize: 12 }}
+              tick={{ fill: chartColors.text, fontSize: 12 }}
               tickLine={false}
-              axisLine={{ stroke: "#cbd5e1" }}
+              axisLine={{ stroke: chartColors.axis }}
               label={{
                 value: "Year",
                 position: "insideBottom",
                 offset: -2,
-                fill: "#475569",
+                fill: chartColors.text,
               }}
             />
             <YAxis
               tickFormatter={formatCurrency}
-              tick={{ fill: "#475569", fontSize: 12 }}
+              tick={{ fill: chartColors.text, fontSize: 12 }}
               tickLine={false}
-              axisLine={{ stroke: "#cbd5e1" }}
+              axisLine={{ stroke: chartColors.axis }}
               width={84}
             />
             <Tooltip
@@ -55,7 +73,9 @@ export default function ProjectionChart({ data, showComparison }) {
               labelFormatter={(label) => `Year ${label}`}
               contentStyle={{
                 borderRadius: 8,
-                border: "1px solid #cbd5e1",
+                backgroundColor: chartColors.tooltipBackground,
+                border: `1px solid ${chartColors.tooltipBorder}`,
+                color: chartColors.tooltipText,
                 boxShadow: "0 12px 30px rgba(15, 23, 42, 0.12)",
               }}
             />

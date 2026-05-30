@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Download, RotateCcw } from "lucide-react";
+import { Download, Moon, RotateCcw, Sun } from "lucide-react";
 import AssumptionsPanel from "./components/AssumptionsPanel.jsx";
 import InputControl from "./components/InputControl.jsx";
 import ProjectionChart from "./components/ProjectionChart.jsx";
@@ -32,6 +32,7 @@ function App() {
   const [inputs, setInputs] = useState(DEFAULT_INPUTS);
   const [comparisonEnabled, setComparisonEnabled] = useState(true);
   const [comparison, setComparison] = useState(DEFAULT_COMPARISON);
+  const [isDarkMode, setIsDarkMode] = useState(true);
 
   const primaryProjection = useMemo(
     () => calculateProjection(inputs),
@@ -88,17 +89,18 @@ function App() {
   }
 
   return (
-    <main className="min-h-screen bg-[#f6f8fb]">
+    <main className={isDarkMode ? "dark" : ""}>
+      <div className="min-h-screen bg-[#f6f8fb] transition-colors dark:bg-slate-950">
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 py-6 sm:px-6 lg:px-8">
-        <header className="flex flex-col justify-between gap-4 border-b border-slate-200 pb-6 lg:flex-row lg:items-end">
+        <header className="flex flex-col justify-between gap-4 border-b border-slate-200 pb-6 dark:border-slate-800 lg:flex-row lg:items-end">
           <div>
-            <p className="text-sm font-semibold uppercase tracking-wide text-teal-700">
+            <p className="text-sm font-semibold uppercase tracking-wide text-teal-700 dark:text-teal-400">
               Investment growth planner
             </p>
-            <h1 className="mt-2 text-3xl font-bold text-slate-950 sm:text-4xl">
+            <h1 className="mt-2 text-3xl font-bold text-slate-950 dark:text-white sm:text-4xl">
               Interactive Investment Growth Dashboard
             </h1>
-            <p className="mt-3 max-w-3xl text-base leading-7 text-slate-600">
+            <p className="mt-3 max-w-3xl text-base leading-7 text-slate-600 dark:text-slate-300">
               Estimate future portfolio value with monthly contributions,
               monthly compounding, scenario comparison, CSV export, and a
               spreadsheet-style annual detail table.
@@ -107,7 +109,21 @@ function App() {
 
           <div className="flex flex-wrap gap-3">
             <button
-              className="inline-flex items-center gap-2 rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-800 shadow-sm transition hover:border-slate-400 hover:bg-slate-50"
+              aria-label={`Switch to ${isDarkMode ? "light" : "dark"} mode`}
+              className="inline-flex items-center gap-2 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-800 shadow-sm transition hover:border-slate-400 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:border-slate-600 dark:hover:bg-slate-800"
+              title={`Switch to ${isDarkMode ? "light" : "dark"} mode`}
+              type="button"
+              onClick={() => setIsDarkMode((current) => !current)}
+            >
+              {isDarkMode ? (
+                <Sun className="h-4 w-4" aria-hidden />
+              ) : (
+                <Moon className="h-4 w-4" aria-hidden />
+              )}
+              {isDarkMode ? "Light" : "Dark"}
+            </button>
+            <button
+              className="inline-flex items-center gap-2 rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-800 shadow-sm transition hover:border-slate-400 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:border-slate-600 dark:hover:bg-slate-800"
               type="button"
               onClick={resetInputs}
             >
@@ -125,7 +141,113 @@ function App() {
           </div>
         </header>
 
-        <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7">
+        <section className="grid gap-4 lg:grid-cols-[1fr_360px]">
+          <div className="rounded-lg border border-slate-200 bg-white p-5 shadow-panel dark:border-slate-700 dark:bg-slate-900">
+            <div>
+              <h2 className="text-lg font-bold text-slate-950 dark:text-white">
+                Projection Inputs
+              </h2>
+              <p className="mt-1 text-sm leading-6 text-slate-500 dark:text-slate-400">
+                Type exact values or use sliders. Updates apply immediately.
+              </p>
+            </div>
+
+            <div className="mt-5 grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
+              <InputControl
+                label="Starting balance"
+                helperText="Current investment account balance."
+                value={inputs.startingBalance}
+                prefix="$"
+                {...INPUT_RANGES.startingBalance}
+                onChange={(value) => updateInput("startingBalance", value)}
+              />
+              <InputControl
+                label="Annual contribution"
+                helperText="Total planned contribution across the year."
+                value={inputs.annualContribution}
+                prefix="$"
+                {...INPUT_RANGES.annualContribution}
+                onChange={(value) => updateInput("annualContribution", value)}
+              />
+              <InputControl
+                label="Expected annual return"
+                helperText="Estimated nominal annual return rate."
+                value={inputs.annualReturnRate}
+                suffix="%"
+                {...INPUT_RANGES.annualReturnRate}
+                onChange={(value) => updateInput("annualReturnRate", value)}
+              />
+              <InputControl
+                label="Years projected"
+                helperText="Projection horizon from 1 to 35 years."
+                value={inputs.years}
+                {...INPUT_RANGES.years}
+                onChange={(value) => updateInput("years", value)}
+              />
+            </div>
+          </div>
+
+          <aside className="rounded-lg border border-slate-200 bg-white p-5 shadow-panel dark:border-slate-700 dark:bg-slate-900">
+            <label className="flex cursor-pointer items-center justify-between gap-4">
+              <span>
+                <span className="block text-sm font-semibold text-slate-800 dark:text-slate-100">
+                  Compare scenario
+                </span>
+                <span className="block text-xs leading-5 text-slate-500 dark:text-slate-400">
+                  Test another contribution and return rate.
+                </span>
+              </span>
+              <input
+                className="h-5 w-5 accent-teal-700 dark:accent-teal-400"
+                type="checkbox"
+                checked={comparisonEnabled}
+                onChange={(event) => setComparisonEnabled(event.target.checked)}
+              />
+            </label>
+
+            {comparisonEnabled ? (
+              <div className="mt-4 grid gap-4 border-t border-slate-200 pt-4 dark:border-slate-700">
+                <InputControl
+                  label="Comparison contribution"
+                  helperText="Alternate annual contribution."
+                  value={comparison.annualContribution}
+                  prefix="$"
+                  {...INPUT_RANGES.annualContribution}
+                  onChange={(value) =>
+                    updateComparison("annualContribution", value)
+                  }
+                />
+                <InputControl
+                  label="Comparison return"
+                  helperText="Alternate expected annual return."
+                  value={comparison.annualReturnRate}
+                  suffix="%"
+                  {...INPUT_RANGES.annualReturnRate}
+                  onChange={(value) =>
+                    updateComparison("annualReturnRate", value)
+                  }
+                />
+                <div className="text-sm text-slate-700 dark:text-slate-300">
+                  Comparison final balance:
+                  <span className="ml-1 font-bold text-slate-950 dark:text-white">
+                    {formatCurrency(finalComparisonBalance)}
+                  </span>
+                </div>
+              </div>
+            ) : null}
+          </aside>
+        </section>
+
+        <section>
+          <div className="mb-3">
+            <h2 className="text-lg font-bold text-slate-950 dark:text-white">
+              Projection Results
+            </h2>
+            <p className="text-sm text-slate-500 dark:text-slate-400">
+              Summary metrics for your primary investment scenario.
+            </p>
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7">
           <SummaryCard
             label="Final balance"
             value={formatCurrency(primaryProjection.finalBalance)}
@@ -164,112 +286,18 @@ function App() {
             value={formatPreciseCurrency(primaryProjection.monthlyContribution)}
             detail="Annual contribution / 12"
           />
+          </div>
         </section>
 
-        <section className="grid gap-6 lg:grid-cols-[360px_1fr]">
-          <aside className="grid gap-4 rounded-lg border border-slate-200 bg-white p-5 shadow-panel">
-            <div>
-              <h2 className="text-lg font-bold text-slate-950">
-                Projection Inputs
-              </h2>
-              <p className="mt-1 text-sm leading-6 text-slate-500">
-                Type exact values or use sliders. Updates apply immediately.
-              </p>
-            </div>
-
-            <InputControl
-              label="Starting balance"
-              helperText="Current investment account balance."
-              value={inputs.startingBalance}
-              prefix="$"
-              {...INPUT_RANGES.startingBalance}
-              onChange={(value) => updateInput("startingBalance", value)}
-            />
-            <InputControl
-              label="Annual contribution"
-              helperText="Total planned contribution across the year."
-              value={inputs.annualContribution}
-              prefix="$"
-              {...INPUT_RANGES.annualContribution}
-              onChange={(value) => updateInput("annualContribution", value)}
-            />
-            <InputControl
-              label="Expected annual return"
-              helperText="Estimated nominal annual return rate."
-              value={inputs.annualReturnRate}
-              suffix="%"
-              {...INPUT_RANGES.annualReturnRate}
-              onChange={(value) => updateInput("annualReturnRate", value)}
-            />
-            <InputControl
-              label="Years projected"
-              helperText="Projection horizon from 1 to 35 years."
-              value={inputs.years}
-              {...INPUT_RANGES.years}
-              onChange={(value) => updateInput("years", value)}
-            />
-
-            <div className="border-t border-slate-200 pt-4">
-              <label className="flex cursor-pointer items-center justify-between gap-4">
-                <span>
-                  <span className="block text-sm font-semibold text-slate-800">
-                    Compare scenario
-                  </span>
-                  <span className="block text-xs leading-5 text-slate-500">
-                    Test another contribution and return rate.
-                  </span>
-                </span>
-                <input
-                  className="h-5 w-5 accent-teal-700"
-                  type="checkbox"
-                  checked={comparisonEnabled}
-                  onChange={(event) =>
-                    setComparisonEnabled(event.target.checked)
-                  }
-                />
-              </label>
-
-              {comparisonEnabled ? (
-                <div className="mt-4 grid gap-4 border-t border-slate-200 pt-4">
-                  <InputControl
-                    label="Comparison contribution"
-                    helperText="Alternate annual contribution."
-                    value={comparison.annualContribution}
-                    prefix="$"
-                    {...INPUT_RANGES.annualContribution}
-                    onChange={(value) =>
-                      updateComparison("annualContribution", value)
-                    }
-                  />
-                  <InputControl
-                    label="Comparison return"
-                    helperText="Alternate expected annual return."
-                    value={comparison.annualReturnRate}
-                    suffix="%"
-                    {...INPUT_RANGES.annualReturnRate}
-                    onChange={(value) =>
-                      updateComparison("annualReturnRate", value)
-                    }
-                  />
-                  <div className="text-sm text-slate-700">
-                    Comparison final balance:
-                    <span className="ml-1 font-bold text-slate-950">
-                      {formatCurrency(finalComparisonBalance)}
-                    </span>
-                  </div>
-                </div>
-              ) : null}
-            </div>
-          </aside>
-
-          <ProjectionChart
-            data={chartData}
-            showComparison={comparisonEnabled}
-          />
-        </section>
+        <ProjectionChart
+          data={chartData}
+          showComparison={comparisonEnabled}
+          isDarkMode={isDarkMode}
+        />
 
         <AssumptionsPanel />
         <ProjectionTable rows={primaryProjection.rows} />
+      </div>
       </div>
     </main>
   );
